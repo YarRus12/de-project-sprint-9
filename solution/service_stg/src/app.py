@@ -38,7 +38,7 @@ if __name__ == '__main__':
     # Запускаем процессор в бэкграунде.
     # BackgroundScheduler будет по расписанию вызывать функцию run нашего обработчика(SampleMessageProcessor).
     scheduler = BackgroundScheduler()
-    scheduler.add_job(func=proc.run, trigger="interval", seconds=config.DEFAULT_JOB_INTERVAL)
+    scheduler.add_job(func=proc.run, trigger="interval", seconds=25)
     scheduler.start()
 
     # стартуем Flask-приложение.
