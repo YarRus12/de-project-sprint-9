@@ -34,6 +34,6 @@ class CdmMessageProcessor:
             if not data:
                 break
             message.load_data(
-                user_data = data, ensure_ascii=False)
+                data = data, ensure_ascii=False)
 
         self._logger.info(f"{datetime.utcnow()}: FINISH")

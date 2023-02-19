@@ -29,10 +29,12 @@ class DdsRepository:
 
 
     def load_user(self,
-                    user_data: dict # user_data = order_data['user']
+                    user_data: dict
                     ) -> None:
         """
-        Принимает в себя данные вида 
+        Функция загружает данные о пользователях в dds слой
+        Принимает в себя данные вида:
+        user_data = order_data['user']
         user_data = {
                 "id": "626a81ce9a8cd1920641e296",
                 "name": "Котова Ольга Вениаминовна"}
@@ -72,6 +74,7 @@ class DdsRepository:
                             products_data: dict # products_data = order_data['payload']['products']:
                             ) -> None:
         """
+        Функция загружает данные о всех продуктах и категориях заказа в dds слой
         Принимает в себя данные вида 
         products_data = [
                         {
@@ -119,7 +122,6 @@ class DdsRepository:
                         'load_src': 'А вот тут вопрос что указывать в качестве источника!!!!!!!!!',
                     })                
                 # чтобы не прогонять лишнюю итерацию сразу запишем категории
-                
                 # h_category_pk = 'Специально вынес это поле отдельно, так как немного непонятно как оно должно быть сгенерировано'
                 # Но наверное поле формируется хэшированием record["category"]
                 c.cursor().execute(
@@ -137,10 +139,12 @@ class DdsRepository:
     
     
     def load_restaurant(self,
-                            restaurant_data: dict # restaurant_data = order_data["payload"]['restaurant']
+                            restaurant_data: dict 
                             ) -> None:
         """
+        Функция загружает данные о ресторанах в dds слой
         Принимает в себя данные вида
+        restaurant_data = order_data["payload"]['restaurant']
         restaurant_data = {
                     "id": "626a81cfefa404208fe9abae",
                     "name": "Кофейня №1"
@@ -179,10 +183,12 @@ class DdsRepository:
 
 
     def load_orders(self,
-                            payload_data: dict # payload_data = order_data['payload']
+                            payload_data: dict
                             ) -> None:
         """
+        Функция загружает данные о заказах в dds слой
         Принимает в себя данные вида
+        payload_data = order_data['payload']
         payload_data = {
                 "id": 322519,
                 "date": "2022-11-19 16:06:36",
@@ -289,11 +295,12 @@ class DdsRepository:
                             'load_src': 'А вот тут вопрос что указывать в качестве источника!!!!!!!!!',
                         })
 
-    def load_cathegoty_links(self, product_data # product_data = order_data['payload']['products']
+    def load_cathegoty_links(self, product_data
                             ) -> None:
         """
         Функция принимает на вход данные о продукте и
                 заполняет таблицу соединяющую категории и продукты
+        product_data = order_data['payload']['products']
         """
         with self._db.connection() as c:
             for _ in range(len(product_data)):

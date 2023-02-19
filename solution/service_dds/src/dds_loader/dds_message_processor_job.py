@@ -53,18 +53,8 @@ class DdsMessageProcessor:
                 record['user_id'] = order_data["payload"]['user']['id']
 
         # !!!! Вот тут я малость застрял, так как в уроке мы не настраивали топик
-        # Как настроить топик?
-        # В /Users/iaroslavrussu/Dropbox/Warlock/Data_engineering/yandex_practicum/de-project-9/de-project-sprint-9/solution/service_dds/src/app_config.py
-        # Уже настроен self.kafka_producer_topic = str(os.getenv('KAFKA_DESTINATION_TOPIC'))
             self._producer.produce(data_out)
 
         
         self._logger.info(f"{datetime.utcnow()}: FINISH")
 
-
-"""
-Как я понимаю каждый продукт заказа очень индивидуален
-и в случае измення аттрибутов или у продукта будет новый id
-или мне предется сделать ON CONFLICT SET price .......
-как если бы это был SCD1
-"""
