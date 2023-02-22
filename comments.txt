@@ -17,6 +17,10 @@ docker compose up -d --build
 Но уже на этапе построения контейнера я получаю ошибку при установке зависимостей (ниже)
 Сорри, что нагружаю тебя проблемами спринта, а не проекта, но боюсь что проект удастся завершить только целиком
 
+Проблема с установкой confluent_kafka для всех сервисов, гугл подсказыввает, что это локальная проблема моего MacBook
+Он принципиально важен?
+
+
 
 iaroslavrussu@MacBook-Air-Aroslav solution % docker compose up -d --build
 WARN[0000] The "PG_WAREHOUSE_DBNAME" variable is not set. Defaulting to a blank string. 

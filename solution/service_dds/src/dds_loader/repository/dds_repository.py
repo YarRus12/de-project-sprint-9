@@ -40,6 +40,7 @@ class DdsRepository:
                 "name": "Котова Ольга Вениаминовна"}
         """
         with self._db.connection() as c:
+            # Вставляем данные в хаб
             c.cursor().execute(
                     f"""
                         INSERT INTO dds.h_user (h_user_pk, user_id, load_dt, load_src) VALUES
@@ -52,9 +53,9 @@ class DdsRepository:
                         'load_dt': datetime.now(),
                         'load_src': 'А вот тут вопрос что указывать в качестве источника!!!!!!!!!',
                     })
-            
-            hk_user_names_pk = hash(user_data['id'] + user_data['name'] + userlogin)
+            # Вставляем данные в саттелит
             userlogin = 'userlogin есть в DDL коде урока, но я не вижу этих данных' # !!!!!!!!!!!
+            hk_user_names_pk = hash(user_data['id'] + user_data['name'] + userlogin)
             c.cursor().execute(
                     f"""
                         INSERT INTO dds.s_user_names (hk_user_names_pk, h_user_pk, username, userlogin, load_dt, load_src) VALUES
@@ -95,6 +96,7 @@ class DdsRepository:
         """
         for record in products_data:
             with self._db.connection() as c:
+                # Вставляем данные в хаб
                 c.cursor().execute(
                     f"""
                         INSERT INTO dds.h_product (h_product_pk, product_id, load_dt, load_src) VALUES
@@ -107,7 +109,8 @@ class DdsRepository:
                         'load_dt': datetime.now(),
                         'load_src': 'А вот тут вопрос что указывать в качестве источника!!!!!!!!!',
                     })
-                hk_product_names_pk = 'Специально вынес это поле отдельно, так как немного непонятно как оно должно быть сгенерировано'
+                # Вставляем данные в саттелит
+                hk_product_names_pk = hash(record['id'] + record['name'])
                 c.cursor().execute(
                     f"""
                         INSERT INTO dds.s_product_names (hk_product_names_pk, h_product_pk, name, load_dt, load_src) VALUES
@@ -122,7 +125,6 @@ class DdsRepository:
                         'load_src': 'А вот тут вопрос что указывать в качестве источника!!!!!!!!!',
                     })                
                 # чтобы не прогонять лишнюю итерацию сразу запишем категории
-                
                 c.cursor().execute(
                     f"""
                         INSERT INTO dds.h_category (h_category_pk, category_name, load_dt, load_src) VALUES
@@ -150,6 +152,7 @@ class DdsRepository:
                         }
         """
         with self._db.connection() as c:
+            # Вставляем данные в хаб
             c.cursor().execute(
                     f"""
                         INSERT INTO dds.h_restaurant (h_restaurant_pk, restaurant_id, load_dt, load_src) VALUES
@@ -164,7 +167,8 @@ class DdsRepository:
                     })
                 
         with self._db.connection() as c:
-            hk_restaurant_names_pk = 'Специально вынес это поле отдельно, так как немного непонятно как оно должно быть сгенерировано'
+            # Вставляем данные в саттелит
+            hk_restaurant_names_pk = hash(restaurant_data['id'] + restaurant_data['name'])
             c.cursor().execute(
                     f"""
                         INSERT INTO dds.s_restaurant_names (hk_restaurant_names_pk, h_restaurant_pk, name, load_dt, load_src) VALUES
@@ -173,9 +177,8 @@ class DdsRepository:
                     """,
                     {
                         'hk_restaurant_names_pk': hk_restaurant_names_pk,
-                        'h_category_pk': hash(restaurant_data["id"]),
-                        'h_category_pk': restaurant_data["name"],
-                        'restaurant_id': restaurant_data["id"],
+                        'h_restaurant_pk': hash(restaurant_data["id"]),
+                        'name': restaurant_data["name"],
                         'load_dt': datetime.now(),
                         'load_src': 'А вот тут вопрос что указывать в качестве источника!!!!!!!!!',
                     })
@@ -200,6 +203,7 @@ class DdsRepository:
                 }
         """
         with self._db.connection() as c:
+            # Вставляем данные в хаб
             c.cursor().execute(
                     f"""
                         INSERT INTO dds.h_order (h_order_pk, order_id, order_dt, load_dt, load_src) VALUES
@@ -214,7 +218,8 @@ class DdsRepository:
                         'load_src': 'А вот тут вопрос что указывать в качестве источника!!!!!!!!!',
                     })
         with self._db.connection() as c:
-            hk_order_cost_pk = 'hk_order_cost_pk'
+            hk_order_cost_pk = hash(payload_data['id'] + payload_data['cost']+payload_data['payment'])
+            # Вставляем данные в саттелит
             c.cursor().execute(
                     f"""
                         INSERT INTO dds.dds.s_order_cost (hk_order_cost_pk, h_order_pk, cost, payment, load_dt, load_src) VALUES
@@ -230,7 +235,7 @@ class DdsRepository:
                         'load_src': 'А вот тут вопрос что указывать в качестве источника!!!!!!!!!',
                     })
         with self._db.connection() as c:
-            hk_order_status_pk = 'hk_order_status_pk'
+            hk_order_status_pk = hash(payload_data['id'] + payload_data['status'])
             c.cursor().execute(
                     f"""
                         INSERT INTO dds.dds.s_order_cost (hk_order_status_pk, h_order_pk, status, load_dt, load_src) VALUES
@@ -273,7 +278,7 @@ class DdsRepository:
                             ON CONFLICT hk_order_status_pk DO NOTHING -- это пока заготовка!!!!!!!!!
                         """,
                         {
-                            'hk_order_status_pk': hash(order_data['payload']['products']['id'], order_data["payload"]['restaurant']),
+                            'hk_order_status_pk': hash(order_data["payload"]['restaurant']+order_data['payload']['products']['id']),
                             'h_restaurant_pk': hash(order_data["payload"]['restaurant']),
                             'h_product_pk': hash(order_data['payload']['products']['id']),
                             'load_dt': datetime.now(),
@@ -287,7 +292,7 @@ class DdsRepository:
                             ON CONFLICT hk_order_status_pk DO NOTHING -- это пока заготовка!!!!!!!!!
                         """,
                         {
-                            'hk_order_user_pk': hash(order_data['payload']['id'],order_data['payload']['user']),
+                            'hk_order_user_pk': hash(order_data['payload']['id']+order_data['payload']['user']),
                             'h_order_pk': hash(order_data['payload']['id']),
                             'h_user_pk': hash(order_data['payload']['user']),
                             'load_dt': datetime.now(),
@@ -310,7 +315,7 @@ class DdsRepository:
                                 ON CONFLICT hk_order_status_pk DO NOTHING -- это пока заготовка!!!!!!!!!
                             """,
                             {
-                                'hk_product_category_pk': hash(product_data['id'], product_data['category']),
+                                'hk_product_category_pk': hash(product_data['id']+ product_data['category']),
                                 'h_category_pk': hash(product_data['category']),
                                 'h_product_pk': hash(product_data['id']),
                                 'load_dt': datetime.now(),
