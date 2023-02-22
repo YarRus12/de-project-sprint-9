@@ -53,8 +53,8 @@ class DdsRepository:
                         'load_src': 'А вот тут вопрос что указывать в качестве источника!!!!!!!!!',
                     })
             
-            hk_user_names_pk = 'Специально вынес это поле отдельно, так как немного непонятно как оно должно быть сгенерировано'
-            userlogin = 'userlogin есть в DDL коде урока, но я не вижу этих данных'
+            hk_user_names_pk = hash(user_data['id'] + user_data['name'] + userlogin)
+            userlogin = 'userlogin есть в DDL коде урока, но я не вижу этих данных' # !!!!!!!!!!!
             c.cursor().execute(
                     f"""
                         INSERT INTO dds.s_user_names (hk_user_names_pk, h_user_pk, username, userlogin, load_dt, load_src) VALUES
@@ -99,7 +99,7 @@ class DdsRepository:
                     f"""
                         INSERT INTO dds.h_product (h_product_pk, product_id, load_dt, load_src) VALUES
                         (%(hk_user_names_pk)s, %(h_user_pk)s, %(username)s, %(userlogin)s, %(load_dt)s, %(load_src)s)
-                        ON CONFLICT h_product_pk DO NOTHING -- это пока заготовка!!!!!!!!!
+                        ON CONFLICT h_product_pk DO NOTHING
                     """,
                     {
                         'h_product_pk': hash(record['id']),
@@ -112,7 +112,7 @@ class DdsRepository:
                     f"""
                         INSERT INTO dds.s_product_names (hk_product_names_pk, h_product_pk, name, load_dt, load_src) VALUES
                         (%(hk_user_names_pk)s, %(h_user_pk)s, %(username)s, %(userlogin)s, %(load_dt)s, %(load_src)s)
-                        ON CONFLICT hk_product_names_pk DO NOTHING -- это пока заготовка!!!!!!!!!
+                        ON CONFLICT hk_product_names_pk DO UPDATE SET h_product_pk = EXCLUDED.h_product_pk, name=EXCLUDED.name
                     """,
                     {
                         'hk_product_names_pk': hk_product_names_pk,
@@ -122,13 +122,12 @@ class DdsRepository:
                         'load_src': 'А вот тут вопрос что указывать в качестве источника!!!!!!!!!',
                     })                
                 # чтобы не прогонять лишнюю итерацию сразу запишем категории
-                # h_category_pk = 'Специально вынес это поле отдельно, так как немного непонятно как оно должно быть сгенерировано'
-                # Но наверное поле формируется хэшированием record["category"]
+                
                 c.cursor().execute(
                     f"""
                         INSERT INTO dds.h_category (h_category_pk, category_name, load_dt, load_src) VALUES
                         (%(h_category_pk)s, %(category_name)s, %(load_dt)s, %(load_src)s)
-                        ON CONFLICT h_category_pk DO NOTHING -- это пока заготовка!!!!!!!!!
+                        ON CONFLICT h_category_pk DO NOTHING
                     """,
                     {
                         'h_category_pk': hash(record["category"]),

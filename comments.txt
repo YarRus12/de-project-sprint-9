@@ -1,41 +1,276 @@
-Привет, Саша!
-Спасибо за твои ответы!
-Еще раз прошу меня простить, но этот спринт для меня тяжеловат(
-Обычно я стараюсь не отправлять на выходных
-Но на следующей неделе очень мало рабочих дней, поэтому сорри
-С проверкой не спеши, если у нас нет жесткого kpi то я подожду
+Еще раз привет!
 
-По слою dds
-    Перенес из урока DDL скрипт для таблицы в dds (DDL_dds.sql)
+Замечания я услышал, обязательно поправлю
+Рекомендация сфокусироваться на создании первой (простой и, возможно, неполной) версии сервисов, 
+и попробовать их запустить очень правильная, но именно тут у меня самая большая проблема
+В этот прекрасный урок запихали столько всего, что уже невозможно понять а как собственно запустить проект
 
-    В файле обработки приложения dds_message_processor_job.py сделана заготовка класса DdsMessageProcessor
-        но мне немного непонятно как создавать новый топик,     
-        в файле solution/service_dds/src/app_config.py уже настроен self.kafka_producer_topic = str(os.getenv('KAFKA_DESTINATION_TOPIC'))
-        нужно ли мне просто заменить kafka_producer_topic на другой, из которого потом будет вычитывать следующий слой?
+Пытаться собрать его на сервере не самая радужная для меня идея
+Остается запустить локально
+На текущий момент у меня есть настроенный удаленный сервер с запущенными Kafka, Redis, Postgres
+И это уже хорошо!
 
-    Создан файл repository.dds_repository
-        Есть вопрос по работе с продуктами
-        Как я понимаю каждый продукт заказа очень индивидуален
-    и в случае измення аттрибутов или у продукта будет новый id
-    или же мы работаем с верионной формата таблицей SCD1 и новые аттрибуты перезаписывают прошлые
+По логике спринта в конце урока я должен запускать контейнер с помощью
+docker compose up -d --build 
+из папки с docker-compose.yaml
 
-        Немного непонятно чем заполнять поле load_src в нашей таблице dds
-
-        Поля hk_user_names_pk, hk_product_names_pk, hk_restaurant_names_pk
-        нужно заполнять как hash() id их сущностей? 
-        и отдельно поле h_category_pk его нужно формировать через hash() имени категории?
+Но уже на этапе построения контейнера я получаю ошибку при установке зависимостей (ниже)
+Сорри, что нагружаю тебя проблемами спринта, а не проекта, но боюсь что проект удастся завершить только целиком
 
 
-По слою cdm
-    Перенес из урока DDL скрипт для таблицы в dds (DDL_cdm.sql)
-
-    В файле обработки приложения cdm_message_processor_job.py сделана заготовка класса CdmMessageProcessor
-        или я доблен поправить конфиги или прописать данные прям в файле, но первое представляется мне более правильным
-    
-    В самом классе CdmRepository сомневаюсь в правильности логики
-    ON CONFLICT (user_id, product_id) DO UPDATE SET order_cnt = EXCLUDED.order_cnt + 1;
-
- 
-Пока на этом все!
-Буду ждать твою проверку и рад замечаниям!
-Успехов!
+iaroslavrussu@MacBook-Air-Aroslav solution % docker compose up -d --build
+WARN[0000] The "PG_WAREHOUSE_DBNAME" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "KAFKA_STG_SERVICE_ORDERS_TOPIC" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "PG_WAREHOUSE_PORT" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "KAFKA_CONSUMER_USERNAME" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "PG_WAREHOUSE_PASSWORD" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "PG_WAREHOUSE_USER" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "KAFKA_CONSUMER_PASSWORD" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "PG_WAREHOUSE_HOST" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "KAFKA_DDS_SERVICE_ORDERS_TOPIC" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "KAFKA_HOST" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "KAFKA_CONSUMER_GROUP" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "KAFKA_PORT" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "KAFKA_CONSUMER_USERNAME" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "PG_WAREHOUSE_PASSWORD" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "KAFKA_DDS_SERVICE_ORDERS_TOPIC" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "PG_WAREHOUSE_HOST" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "PG_WAREHOUSE_PORT" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "KAFKA_HOST" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "KAFKA_PORT" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "PG_WAREHOUSE_DBNAME" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "PG_WAREHOUSE_USER" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "KAFKA_CONSUMER_GROUP" variable is not set. Defaulting to a blank string. 
+WARN[0000] The "KAFKA_CONSUMER_PASSWORD" variable is not set. Defaulting to a blank string. 
+[+] Building 28.2s (13/21)                                                                                                                                              
+ => [dds_service:local internal] load build definition from dockerfile                                                                                             0.0s
+ => => transferring dockerfile: 81B                                                                                                                                0.0s
+ => [cdm_service:local internal] load build definition from dockerfile                                                                                             0.0s
+ => => transferring dockerfile: 81B                                                                                                                                0.0s
+ => [dds_service:local internal] load .dockerignore                                                                                                                0.0s
+ => => transferring context: 2B                                                                                                                                    0.0s
+ => [cdm_service:local internal] load .dockerignore                                                                                                                0.0s
+ => => transferring context: 2B                                                                                                                                    0.0s
+ => [cdm_service:local internal] load metadata for docker.io/library/python:3.10                                                                                   3.7s
+ => [cdm_service:local 1/8] FROM docker.io/library/python:3.10@sha256:0b21ab6fe705300678a84c3f4786ba056fa9af94790d8addf764c789b48987a2                             0.0s
+ => => resolve docker.io/library/python:3.10@sha256:0b21ab6fe705300678a84c3f4786ba056fa9af94790d8addf764c789b48987a2                                               0.0s
+ => [dds_service:local internal] load build context                                                                                                                0.0s
+ => => transferring context: 3.04kB                                                                                                                                0.0s
+ => [cdm_service:local internal] load build context                                                                                                                0.0s
+ => => transferring context: 1.54kB                                                                                                                                0.0s
+ => CACHED [dds_service:local 2/8] RUN apt-get update -y                                                                                                           0.0s
+ => CACHED [cdm_service:local 3/8] COPY . .                                                                                                                        0.0s
+ => CACHED [dds_service:local 3/8] COPY . .                                                                                                                        0.0s
+ => ERROR [cdm_service:local 4/8] RUN pip install -r requirements.txt                                                                                             24.2s
+ => CANCELED [dds_service:local 4/8] RUN pip install -r requirements.txt                                                                                          24.3s
+------
+ > [cdm_service:local 4/8] RUN pip install -r requirements.txt:
+#0 4.646 Collecting APScheduler
+#0 9.227   Downloading APScheduler-3.10.0-py3-none-any.whl (59 kB)
+#0 9.336      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 59.2/59.2 kB 539.2 kB/s eta 0:00:00
+#0 9.732 Collecting confluent_kafka
+#0 9.824   Downloading confluent-kafka-2.0.2.tar.gz (119 kB)
+#0 9.946      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 119.5/119.5 kB 915.5 kB/s eta 0:00:00
+#0 9.967   Preparing metadata (setup.py): started
+#0 10.36   Preparing metadata (setup.py): finished with status 'done'
+#0 10.68 Collecting flask
+#0 11.20   Downloading Flask-2.2.3-py3-none-any.whl (101 kB)
+#0 11.25      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 101.8/101.8 kB 1.9 MB/s eta 0:00:00
+#0 11.38 Collecting psycopg
+#0 11.42   Downloading psycopg-3.1.8-py3-none-any.whl (167 kB)
+#0 12.07      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 167.4/167.4 kB 259.0 kB/s eta 0:00:00
+#0 12.46 Collecting psycopg-binary
+#0 12.52   Downloading psycopg_binary-3.1.8-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (3.1 MB)
+#0 19.09      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.1/3.1 MB 468.5 kB/s eta 0:00:00
+#0 19.33 Collecting pydantic
+#0 19.37   Downloading pydantic-1.10.5-py3-none-any.whl (155 kB)
+#0 19.48      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 155.7/155.7 kB 1.4 MB/s eta 0:00:00
+#0 19.59 Collecting six>=1.4.0
+#0 19.65   Downloading six-1.16.0-py2.py3-none-any.whl (11 kB)
+#0 19.92 Collecting tzlocal!=3.*,>=2.0
+#0 19.96   Downloading tzlocal-4.2-py3-none-any.whl (19 kB)
+#0 20.44 Collecting pytz
+#0 20.49   Downloading pytz-2022.7.1-py2.py3-none-any.whl (499 kB)
+#0 20.83      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 499.4/499.4 kB 1.4 MB/s eta 0:00:00
+#0 20.84 Requirement already satisfied: setuptools>=0.7 in /usr/local/lib/python3.10/site-packages (from APScheduler->-r requirements.txt (line 1)) (65.5.1)
+#0 20.91 Collecting itsdangerous>=2.0
+#0 20.94   Downloading itsdangerous-2.1.2-py3-none-any.whl (15 kB)
+#0 21.04 Collecting click>=8.0
+#0 21.07   Downloading click-8.1.3-py3-none-any.whl (96 kB)
+#0 21.18      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 96.6/96.6 kB 958.1 kB/s eta 0:00:00
+#0 21.26 Collecting Jinja2>=3.0
+#0 21.30   Downloading Jinja2-3.1.2-py3-none-any.whl (133 kB)
+#0 21.40      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 133.1/133.1 kB 1.4 MB/s eta 0:00:00
+#0 21.56 Collecting Werkzeug>=2.2.2
+#0 21.71   Downloading Werkzeug-2.2.3-py3-none-any.whl (233 kB)
+#0 22.16      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 233.6/233.6 kB 507.3 kB/s eta 0:00:00
+#0 22.25 Collecting typing-extensions>=4.1
+#0 22.30   Downloading typing_extensions-4.5.0-py3-none-any.whl (27 kB)
+#0 22.46 Collecting MarkupSafe>=2.0
+#0 22.52   Downloading MarkupSafe-2.1.2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (26 kB)
+#0 22.61 Collecting pytz-deprecation-shim
+#0 22.67   Downloading pytz_deprecation_shim-0.1.0.post0-py2.py3-none-any.whl (15 kB)
+#0 22.74 Collecting tzdata
+#0 22.78   Downloading tzdata-2022.7-py2.py3-none-any.whl (340 kB)
+#0 23.03      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 340.1/340.1 kB 1.4 MB/s eta 0:00:00
+#0 23.06 Building wheels for collected packages: confluent_kafka
+#0 23.07   Building wheel for confluent_kafka (setup.py): started
+#0 23.34   Building wheel for confluent_kafka (setup.py): finished with status 'error'
+#0 23.34   error: subprocess-exited-with-error
+#0 23.34   
+#0 23.34   × python setup.py bdist_wheel did not run successfully.
+#0 23.34   │ exit code: 1
+#0 23.34   ╰─> [61 lines of output]
+#0 23.34       running bdist_wheel
+#0 23.34       running build
+#0 23.34       running build_py
+#0 23.34       creating build
+#0 23.34       creating build/lib.linux-aarch64-cpython-310
+#0 23.34       creating build/lib.linux-aarch64-cpython-310/confluent_kafka
+#0 23.34       copying src/confluent_kafka/serializing_producer.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka
+#0 23.34       copying src/confluent_kafka/__init__.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka
+#0 23.34       copying src/confluent_kafka/deserializing_consumer.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka
+#0 23.34       copying src/confluent_kafka/error.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka
+#0 23.34       creating build/lib.linux-aarch64-cpython-310/confluent_kafka/_model
+#0 23.34       copying src/confluent_kafka/_model/__init__.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/_model
+#0 23.34       creating build/lib.linux-aarch64-cpython-310/confluent_kafka/admin
+#0 23.34       copying src/confluent_kafka/admin/_acl.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/admin
+#0 23.34       copying src/confluent_kafka/admin/_group.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/admin
+#0 23.34       copying src/confluent_kafka/admin/_config.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/admin
+#0 23.34       copying src/confluent_kafka/admin/__init__.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/admin
+#0 23.34       copying src/confluent_kafka/admin/_metadata.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/admin
+#0 23.34       copying src/confluent_kafka/admin/_resource.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/admin
+#0 23.34       creating build/lib.linux-aarch64-cpython-310/confluent_kafka/schema_registry
+#0 23.34       copying src/confluent_kafka/schema_registry/avro.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/schema_registry
+#0 23.34       copying src/confluent_kafka/schema_registry/json_schema.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/schema_registry
+#0 23.34       copying src/confluent_kafka/schema_registry/schema_registry_client.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/schema_registry
+#0 23.34       copying src/confluent_kafka/schema_registry/__init__.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/schema_registry
+#0 23.34       copying src/confluent_kafka/schema_registry/protobuf.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/schema_registry
+#0 23.34       copying src/confluent_kafka/schema_registry/error.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/schema_registry
+#0 23.34       creating build/lib.linux-aarch64-cpython-310/confluent_kafka/kafkatest
+#0 23.34       copying src/confluent_kafka/kafkatest/verifiable_consumer.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/kafkatest
+#0 23.34       copying src/confluent_kafka/kafkatest/verifiable_producer.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/kafkatest
+#0 23.34       copying src/confluent_kafka/kafkatest/__init__.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/kafkatest
+#0 23.34       copying src/confluent_kafka/kafkatest/verifiable_client.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/kafkatest
+#0 23.34       creating build/lib.linux-aarch64-cpython-310/confluent_kafka/serialization
+#0 23.34       copying src/confluent_kafka/serialization/__init__.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/serialization
+#0 23.34       creating build/lib.linux-aarch64-cpython-310/confluent_kafka/_util
+#0 23.34       copying src/confluent_kafka/_util/validation_util.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/_util
+#0 23.34       copying src/confluent_kafka/_util/__init__.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/_util
+#0 23.34       copying src/confluent_kafka/_util/conversion_util.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/_util
+#0 23.34       creating build/lib.linux-aarch64-cpython-310/confluent_kafka/avro
+#0 23.34       copying src/confluent_kafka/avro/cached_schema_registry_client.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/avro
+#0 23.34       copying src/confluent_kafka/avro/load.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/avro
+#0 23.34       copying src/confluent_kafka/avro/__init__.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/avro
+#0 23.34       copying src/confluent_kafka/avro/error.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/avro
+#0 23.34       creating build/lib.linux-aarch64-cpython-310/confluent_kafka/avro/serializer
+#0 23.34       copying src/confluent_kafka/avro/serializer/message_serializer.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/avro/serializer
+#0 23.34       copying src/confluent_kafka/avro/serializer/__init__.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/avro/serializer
+#0 23.34       running build_ext
+#0 23.34       building 'confluent_kafka.cimpl' extension
+#0 23.34       creating build/temp.linux-aarch64-cpython-310
+#0 23.34       creating build/temp.linux-aarch64-cpython-310/tmp
+#0 23.34       creating build/temp.linux-aarch64-cpython-310/tmp/pip-install-mkl9jntc
+#0 23.34       creating build/temp.linux-aarch64-cpython-310/tmp/pip-install-mkl9jntc/confluent-kafka_bc54f3d36f094637958adab9fb774866
+#0 23.34       creating build/temp.linux-aarch64-cpython-310/tmp/pip-install-mkl9jntc/confluent-kafka_bc54f3d36f094637958adab9fb774866/src
+#0 23.34       creating build/temp.linux-aarch64-cpython-310/tmp/pip-install-mkl9jntc/confluent-kafka_bc54f3d36f094637958adab9fb774866/src/confluent_kafka
+#0 23.34       creating build/temp.linux-aarch64-cpython-310/tmp/pip-install-mkl9jntc/confluent-kafka_bc54f3d36f094637958adab9fb774866/src/confluent_kafka/src
+#0 23.34       gcc -pthread -Wno-unused-result -Wsign-compare -DNDEBUG -g -fwrapv -O3 -Wall -fPIC -I/usr/local/include/python3.10 -c /tmp/pip-install-mkl9jntc/confluent-kafka_bc54f3d36f094637958adab9fb774866/src/confluent_kafka/src/Admin.c -o build/temp.linux-aarch64-cpython-310/tmp/pip-install-mkl9jntc/confluent-kafka_bc54f3d36f094637958adab9fb774866/src/confluent_kafka/src/Admin.o
+#0 23.34       In file included from /tmp/pip-install-mkl9jntc/confluent-kafka_bc54f3d36f094637958adab9fb774866/src/confluent_kafka/src/Admin.c:17:
+#0 23.34       /tmp/pip-install-mkl9jntc/confluent-kafka_bc54f3d36f094637958adab9fb774866/src/confluent_kafka/src/confluent_kafka.h:23:10: fatal error: librdkafka/rdkafka.h: No such file or directory
+#0 23.34          23 | #include <librdkafka/rdkafka.h>
+#0 23.34             |          ^~~~~~~~~~~~~~~~~~~~~~
+#0 23.34       compilation terminated.
+#0 23.34       error: command '/usr/bin/gcc' failed with exit code 1
+#0 23.34       [end of output]
+#0 23.34   
+#0 23.34   note: This error originates from a subprocess, and is likely not a problem with pip.
+#0 23.34   ERROR: Failed building wheel for confluent_kafka
+#0 23.34   Running setup.py clean for confluent_kafka
+#0 23.48 Failed to build confluent_kafka
+#0 23.53 Installing collected packages: pytz, confluent_kafka, tzdata, typing-extensions, six, psycopg-binary, MarkupSafe, itsdangerous, click, Werkzeug, pytz-deprecation-shim, pydantic, psycopg, Jinja2, tzlocal, flask, APScheduler
+#0 23.60   Running setup.py install for confluent_kafka: started
+#0 23.80   Running setup.py install for confluent_kafka: finished with status 'error'
+#0 23.80   error: subprocess-exited-with-error
+#0 23.80   
+#0 23.80   × Running setup.py install for confluent_kafka did not run successfully.
+#0 23.80   │ exit code: 1
+#0 23.80   ╰─> [63 lines of output]
+#0 23.80       running install
+#0 23.80       /usr/local/lib/python3.10/site-packages/setuptools/command/install.py:34: SetuptoolsDeprecationWarning: setup.py install is deprecated. Use build and pip and other standards-based tools.
+#0 23.80         warnings.warn(
+#0 23.80       running build
+#0 23.80       running build_py
+#0 23.80       creating build
+#0 23.80       creating build/lib.linux-aarch64-cpython-310
+#0 23.80       creating build/lib.linux-aarch64-cpython-310/confluent_kafka
+#0 23.80       copying src/confluent_kafka/serializing_producer.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka
+#0 23.80       copying src/confluent_kafka/__init__.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka
+#0 23.80       copying src/confluent_kafka/deserializing_consumer.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka
+#0 23.80       copying src/confluent_kafka/error.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka
+#0 23.80       creating build/lib.linux-aarch64-cpython-310/confluent_kafka/_model
+#0 23.80       copying src/confluent_kafka/_model/__init__.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/_model
+#0 23.80       creating build/lib.linux-aarch64-cpython-310/confluent_kafka/admin
+#0 23.80       copying src/confluent_kafka/admin/_acl.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/admin
+#0 23.80       copying src/confluent_kafka/admin/_group.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/admin
+#0 23.80       copying src/confluent_kafka/admin/_config.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/admin
+#0 23.80       copying src/confluent_kafka/admin/__init__.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/admin
+#0 23.80       copying src/confluent_kafka/admin/_metadata.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/admin
+#0 23.80       copying src/confluent_kafka/admin/_resource.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/admin
+#0 23.80       creating build/lib.linux-aarch64-cpython-310/confluent_kafka/schema_registry
+#0 23.80       copying src/confluent_kafka/schema_registry/avro.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/schema_registry
+#0 23.80       copying src/confluent_kafka/schema_registry/json_schema.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/schema_registry
+#0 23.80       copying src/confluent_kafka/schema_registry/schema_registry_client.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/schema_registry
+#0 23.80       copying src/confluent_kafka/schema_registry/__init__.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/schema_registry
+#0 23.80       copying src/confluent_kafka/schema_registry/protobuf.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/schema_registry
+#0 23.80       copying src/confluent_kafka/schema_registry/error.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/schema_registry
+#0 23.80       creating build/lib.linux-aarch64-cpython-310/confluent_kafka/kafkatest
+#0 23.80       copying src/confluent_kafka/kafkatest/verifiable_consumer.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/kafkatest
+#0 23.80       copying src/confluent_kafka/kafkatest/verifiable_producer.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/kafkatest
+#0 23.80       copying src/confluent_kafka/kafkatest/__init__.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/kafkatest
+#0 23.80       copying src/confluent_kafka/kafkatest/verifiable_client.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/kafkatest
+#0 23.80       creating build/lib.linux-aarch64-cpython-310/confluent_kafka/serialization
+#0 23.80       copying src/confluent_kafka/serialization/__init__.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/serialization
+#0 23.80       creating build/lib.linux-aarch64-cpython-310/confluent_kafka/_util
+#0 23.80       copying src/confluent_kafka/_util/validation_util.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/_util
+#0 23.80       copying src/confluent_kafka/_util/__init__.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/_util
+#0 23.80       copying src/confluent_kafka/_util/conversion_util.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/_util
+#0 23.80       creating build/lib.linux-aarch64-cpython-310/confluent_kafka/avro
+#0 23.80       copying src/confluent_kafka/avro/cached_schema_registry_client.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/avro
+#0 23.80       copying src/confluent_kafka/avro/load.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/avro
+#0 23.80       copying src/confluent_kafka/avro/__init__.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/avro
+#0 23.80       copying src/confluent_kafka/avro/error.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/avro
+#0 23.80       creating build/lib.linux-aarch64-cpython-310/confluent_kafka/avro/serializer
+#0 23.80       copying src/confluent_kafka/avro/serializer/message_serializer.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/avro/serializer
+#0 23.80       copying src/confluent_kafka/avro/serializer/__init__.py -> build/lib.linux-aarch64-cpython-310/confluent_kafka/avro/serializer
+#0 23.80       running build_ext
+#0 23.80       building 'confluent_kafka.cimpl' extension
+#0 23.80       creating build/temp.linux-aarch64-cpython-310
+#0 23.80       creating build/temp.linux-aarch64-cpython-310/tmp
+#0 23.80       creating build/temp.linux-aarch64-cpython-310/tmp/pip-install-mkl9jntc
+#0 23.80       creating build/temp.linux-aarch64-cpython-310/tmp/pip-install-mkl9jntc/confluent-kafka_bc54f3d36f094637958adab9fb774866
+#0 23.80       creating build/temp.linux-aarch64-cpython-310/tmp/pip-install-mkl9jntc/confluent-kafka_bc54f3d36f094637958adab9fb774866/src
+#0 23.80       creating build/temp.linux-aarch64-cpython-310/tmp/pip-install-mkl9jntc/confluent-kafka_bc54f3d36f094637958adab9fb774866/src/confluent_kafka
+#0 23.80       creating build/temp.linux-aarch64-cpython-310/tmp/pip-install-mkl9jntc/confluent-kafka_bc54f3d36f094637958adab9fb774866/src/confluent_kafka/src
+#0 23.80       gcc -pthread -Wno-unused-result -Wsign-compare -DNDEBUG -g -fwrapv -O3 -Wall -fPIC -I/usr/local/include/python3.10 -c /tmp/pip-install-mkl9jntc/confluent-kafka_bc54f3d36f094637958adab9fb774866/src/confluent_kafka/src/Admin.c -o build/temp.linux-aarch64-cpython-310/tmp/pip-install-mkl9jntc/confluent-kafka_bc54f3d36f094637958adab9fb774866/src/confluent_kafka/src/Admin.o
+#0 23.80       In file included from /tmp/pip-install-mkl9jntc/confluent-kafka_bc54f3d36f094637958adab9fb774866/src/confluent_kafka/src/Admin.c:17:
+#0 23.80       /tmp/pip-install-mkl9jntc/confluent-kafka_bc54f3d36f094637958adab9fb774866/src/confluent_kafka/src/confluent_kafka.h:23:10: fatal error: librdkafka/rdkafka.h: No such file or directory
+#0 23.80          23 | #include <librdkafka/rdkafka.h>
+#0 23.80             |          ^~~~~~~~~~~~~~~~~~~~~~
+#0 23.80       compilation terminated.
+#0 23.80       error: command '/usr/bin/gcc' failed with exit code 1
+#0 23.80       [end of output]
+#0 23.80   
+#0 23.80   note: This error originates from a subprocess, and is likely not a problem with pip.
+#0 23.80 error: legacy-install-failure
+#0 23.80 
+#0 23.80 × Encountered error while trying to install package.
+#0 23.80 ╰─> confluent_kafka
+#0 23.80 
+#0 23.80 note: This is an issue with the package mentioned above, not pip.
+#0 23.80 hint: See above for output from the failure.
+#0 24.05 
+#0 24.05 [notice] A new release of pip available: 22.3.1 -> 23.0.1
+#0 24.05 [notice] To update, run: pip install --upgrade pip
+------
+failed to solve: executor failed running [/bin/sh -c pip install -r requirements.txt]: exit code: 1

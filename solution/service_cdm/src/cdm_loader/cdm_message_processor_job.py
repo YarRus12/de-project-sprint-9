@@ -7,20 +7,13 @@ from lib.kafka_connect import KafkaConsumer
 
 class CdmMessageProcessor:
     def __init__(self,
+                    consumer,
                  dds_repository,
                  logger: Logger,
                  ) -> None:
 
         self._logger = logger
-        # видимо мне нужно сделать одним из аттрибутов класса объект другого класса
-        self._consumer = KafkaConsumer(
-                            host = '',
-                            port= '',
-                            user= '',
-                            password = '',
-                            topic = '',
-                            group = '',
-                            cert_path = '')
+        self._consumer = consumer
         self._dds_repository = dds_repository
         self._batch_size = 100
 

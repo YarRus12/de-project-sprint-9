@@ -25,6 +25,7 @@ class DdsMessageProcessor:
         for _ in range(self._batch_size):
             # получаем данные из consumer
             order_data = self._consumer.consume()
+            scr = self._consumer.kafka_consumer_topic
             # проверка на пустое сообщение
             if not order_data:
                 break
@@ -52,7 +53,7 @@ class DdsMessageProcessor:
             for record in data_out:
                 record['user_id'] = order_data["payload"]['user']['id']
 
-        # !!!! Вот тут я малость застрял, так как в уроке мы не настраивали топик
+        #Отправляем сформированные данные в Kafka 
             self._producer.produce(data_out)
 
         
