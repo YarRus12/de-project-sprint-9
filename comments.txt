@@ -19,7 +19,7 @@ docker compose up -d --build
 
 Проблема с установкой confluent_kafka для всех сервисов, гугл подсказыввает, что это локальная проблема моего MacBook
 Он принципиально важен?
-
+Все три сервиса запускаются нормально
 
 
 iaroslavrussu@MacBook-Air-Aroslav solution % docker compose up -d --build
