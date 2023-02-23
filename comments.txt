@@ -23,7 +23,6 @@
     Один выдает данные при обращении к нему
     Другой принимает данные при обращении к нему
 
-
 DDS слой выполняет требуемуему задачу
     Получает данные из объекта класса ToDdsKafkaProducer файла service_dds/src/dds_loader/dds_emulations.py
     Обрабатывает, преобразует и сохраняет результат в развернутый в облаке postgresql
@@ -38,11 +37,16 @@ DDS слой выполняет требуемуему задачу
     Но я не могу этого делать "Must be superuser to create this extension" и нет ни инструкции, ни подсказки как стать superuser
     на собственном кластере, так что пока переделал в DDL все поля на VARCHAR, чтобы хотябы можно было работать
     Оставить VARCHAR?
-
 2. userlogin есть в DDL коде урока, но я не вижу этих данных, которые были в учебно кафке
     могу заполнить произвольно?
 3. hash(user_data['id']) генерирует случайные цифры это неправильно, поэтому взял hashlib.sha224
     такое решение устроит?
+4. Не понял как можно в cdm_repository
+    INSERT INTO cdm.user_category_counters (user_id, category_id, category_name, order_cnt) VALUES
+                    (%(user_id)s, %(category_id)s, %(category_name)s, %(order_cnt)s)
+                    ON CONFLICT (user_id, category_id) DO UPDATE SET order_cnt = user_category_counters.order_cnt + 1;
+    добавить логику, которая обработает случаи, когда изменяется название продукта (product_name), с тем же id.
+    можно указать несколько случаев ON CONFLICT ???
 
 Код ужасный, неоптимизированный, но работает 
 С проверкой можно не спешить, пока буду делать service_cdm
