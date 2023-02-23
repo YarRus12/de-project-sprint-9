@@ -2,6 +2,7 @@ from datetime import datetime
 from logging import Logger
 import json
 from .repository.dds_repository import DdsRepository
+from .dds_emulations import ToDdsKafkaProducer
 
 class DdsMessageProcessor:
     def __init__(self,
@@ -24,27 +25,29 @@ class DdsMessageProcessor:
         # В цикле обрабатываем данные по величине self._batch_size
         for _ in range(self._batch_size):
             # получаем данные из consumer
-            order_data = self._consumer.consume()
-            scr = self._consumer.kafka_consumer_topic
+            order_data = ToDdsKafkaProducer.produce() #order_data = self._consumer.consume() консьюмер заменен на эмулятор
+            self._logger.info(order_data)
+            #scr = self._consumer.kafka_consumer_topic
             # проверка на пустое сообщение
             if not order_data:
                 break
             # если заказ с тем же номером и таким же статусом уже есть, то пропускаем, это дубль
             if message.check(order = order_data['object_id'], status = order_data['payload']['status']):
                 continue
-        # обращаемся к функциям объекта message и записываем данные в dds слой postgres
+            # обращаемся к функциям объекта message и записываем данные в dds слой postgres
+            
             message.load_user(
-                user_data = order_data['user'], ensure_ascii=False)
+                user_data = order_data['payload']['user'])
             message.load_products(
-                products_data = order_data['payload']['products'], ensure_ascii=False)
+                products_data = order_data['payload']['products'])
             message.load_restaurant(
-                restaurant_data = order_data["payload"]['restaurant'], ensure_ascii=False)
+                restaurant_data = order_data["payload"]['restaurant'])
             message.load_orders(
-                payload_data = order_data['payload'], ensure_ascii=False)
+                payload_data = order_data['payload'])
             message.load_links(
-                order_data = order_data, ensure_ascii=False)
+                order_data = order_data)
             message.load_cathegoty_links(
-                product_data = order_data['payload']['products'], ensure_ascii=False)
+                product_data = order_data['payload']['products'])
         # нам нужно передать только часть данных в новый топик для построения витрин в cdm
         # для счетчика заказов по блюдам нужны id заказа и название блюда order_data["payload"]["products"]
         # для счётчика заказов по категориям товаров order_data["payload"]["products"]

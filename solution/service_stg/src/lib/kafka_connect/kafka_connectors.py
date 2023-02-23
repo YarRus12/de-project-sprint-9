@@ -1,12 +1,12 @@
 import json
+import time
 from typing import Dict, Optional
-
+from kafka import KafkaConsumer
 from confluent_kafka import Consumer, Producer
 
 
 def error_callback(err):
     print('Something went wrong: {}'.format(err))
-
 
 class KafkaProducer:
     def __init__(self, host: str, port: int, user: str, password: str, topic: str, cert_path: str) -> None:
@@ -20,7 +20,7 @@ class KafkaProducer:
             'error_cb': error_callback,
         }
 
-        self.topic = topic
+        self.topic = 'stg-service-orders'
         self.p = Producer(params)
 
     def produce(self, payload: Dict) -> None:
@@ -45,23 +45,24 @@ class KafkaConsumer:
             'sasl.mechanism': 'SCRAM-SHA-512',
             'sasl.username': user,
             'sasl.password': password,
-            'group.id': group,  # '',
+            'group.id': group, 
             'auto.offset.reset': 'earliest',
             'enable.auto.commit': False,
             'error_cb': error_callback,
             'debug': 'all',
             'client.id': 'someclientkey'
         }
-
         self.topic = topic
         self.c = Consumer(params)
         self.c.subscribe([topic])
 
-    def consume(self, timeout: float = 3.0) -> Optional[Dict]:
+    def consume(self, timeout: float = 5.0) -> Optional[Dict]:
         msg = self.c.poll(timeout=timeout)
         if not msg:
+            time.sleep(10)    
             return None
         if msg.error():
+            
             raise Exception(msg.error())
-        val = msg.value().decode()
+        val = msg.value()
         return json.loads(val)

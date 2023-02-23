@@ -1,8 +1,6 @@
-import time
 from datetime import datetime
 from logging import Logger
 import json
-
 from .repository.stg_repository import StgRepository
 
 
@@ -30,12 +28,18 @@ class StgMessageProcessor:
         # обработка сообщений. Создаем обхект message класса StgRepository
         message = StgRepository(self._stg_repository)
         # В цикле обрабатываем данные по величине self._batch_size
-        for _ in range(self._batch_size):
-            # получаем данные из consumer
-            order_data = self._consumer.consume()
+        self._logger.info(f"batch_size = {self._batch_size}")
+        # получаем данные из consumer
+        all_data = [json.loads(value.value) for value in self._consumer]
+        self._logger.info(all_data)
+        for i in range(self._batch_size):
+            order_data = all_data[i]
+            self._logger.info(order_data)
+            #order_data = json.loads(self._consumer.value().decode())
             if not order_data:
                 break
             # обращаемся к функции order_events_insert объекта message и записываем данные в postgres
+            self._logger.info(f"Сейчас будем записывать данные в stage")
             message.order_events_insert(
                 object_id = order_data['object_id'],
                 object_type = order_data['object_type'],
@@ -57,6 +61,11 @@ class StgMessageProcessor:
                     if order_item ['id'] == menu_item['_id']:
                         order_item['category'] = menu_item['category']
                         break
+            
+            self._logger.info('READY TO SEND MESSAGE IN KAFKA')
+            # передаем обогащенные данные в kakfa
+            self._producer.produce(order_data)
+
             """
                 Выходные данные
                     {
@@ -95,9 +104,5 @@ class StgMessageProcessor:
             }
         }
             """
-
-            # передаем обогащенные данные в kakfa
-            self._producer.produce(order_data)
-
         # Пишем в лог, что джоб успешно завершен.
         self._logger.info(f"{datetime.utcnow()}: FINISH")
