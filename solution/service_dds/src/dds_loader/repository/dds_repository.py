@@ -205,67 +205,43 @@ class DdsRepository:
         Функция принимает на вход все данные и
                 заполняет все таблицы соединения, кроме таблицы соединяющий категории и продукты 
         """
-        with self._db.connection() as c:
-            c.cursor().execute(
+        with self._db.connection() as connect:
+            h_order_pk = hashlib.sha224(bytes(str(order_data['payload']['id']), 'utf-8')).hexdigest()
+            h_restaurant_pk = hashlib.sha224(bytes(order_data['payload']['restaurant']['id'], 'utf-8')).hexdigest()
+            h_user_pk = hashlib.sha224(bytes(order_data['payload']['user']['id'], 'utf-8')).hexdigest()
+            hk_order_user_pk = hashlib.sha224(bytes(h_order_pk + h_user_pk, 'utf-8')).hexdigest()
+            connect.cursor().execute(f"""
+                            INSERT INTO dds.l_order_user (hk_order_user_pk, h_order_pk, h_user_pk, load_dt, load_src) VALUES
+                            (cast('{hk_order_user_pk}' as VARCHAR), cast('{h_order_pk}' as VARCHAR), cast('{h_user_pk}' as VARCHAR),'{datetime.now()}'::timestamp, cast('{self.load_src}' as VARCHAR))
+                            ON CONFLICT (hk_order_user_pk) DO NOTHING 
+                        """)
+            connect.commit()
+            #Для каждого продукта в заказе
+            for i in range(len(order_data['payload']['products'])): 
+                h_product_pk = hashlib.sha224(bytes(order_data['payload']['products'][i]['id'], 'utf-8')).hexdigest()
+                hk_order_product_pk = hashlib.sha224(bytes(h_order_pk + h_product_pk, 'utf-8')).hexdigest()
+                connect.cursor().execute(
                         f"""
-                            INSERT INTO dds.dds.l_order_product (hk_order_product_pk, h_order_pk, h_product_pk, load_dt, load_src) VALUES
-                            (%(hk_order_status_pk)s, %(h_order_pk)s, %(cost)s, %(load_dt)s, %(load_src)s)
-                            ON CONFLICT (hk_order_status_pk) DO NOTHING
-                        """,
-                        {
-                            'hk_order_status_pk': hash(order_data['payload']['id'],order_data['payload']['products']['id']),
-                            'h_order_pk': hash(order_data['payload']['id']),
-                            'h_product_pk': hash(order_data['payload']['products']['id']),
-                            'load_dt': datetime.now(),
-                            'load_src': 'А вот тут вопрос что указывать в качестве источника!!!!!!!!!',
-                        })
-            c.cursor().execute(
+                            INSERT INTO dds.l_order_product (hk_order_product_pk, h_order_pk, h_product_pk, load_dt, load_src) VALUES
+                            (cast('{hk_order_product_pk}' as VARCHAR), cast('{h_order_pk}' as VARCHAR), cast('{h_product_pk}' as VARCHAR),'{datetime.now()}'::timestamp, cast('{self.load_src}' as VARCHAR))
+                            ON CONFLICT (hk_order_product_pk) DO NOTHING -- если дубль, то пропускаем
+                        """)
+                connect.commit()
+                hk_product_restaurant_pk = hashlib.sha224(bytes(h_restaurant_pk + h_product_pk, 'utf-8')).hexdigest()
+                connect.cursor().execute(
                         f"""
-                            INSERT INTO dds.dds.l_product_restaurant (hk_product_restaurant_pk, h_restaurant_pk, h_product_pk, load_dt, load_src) VALUES
-                            (%(hk_order_status_pk)s, %(h_order_pk)s, %(cost)s, %(load_dt)s, %(load_src)s)
-                            ON CONFLICT hk_order_status_pk DO NOTHING -- это пока заготовка!!!!!!!!!
-                        """,
-                        {
-                            'hk_order_status_pk': hash(order_data["payload"]['restaurant']+order_data['payload']['products']['id']),
-                            'h_restaurant_pk': hash(order_data["payload"]['restaurant']),
-                            'h_product_pk': hash(order_data['payload']['products']['id']),
-                            'load_dt': datetime.now(),
-                            'load_src': 'А вот тут вопрос что указывать в качестве источника!!!!!!!!!',
-                        })
-
-            c.cursor().execute(
-                        f"""
-                            INSERT INTO dds.dds.l_order_user (hk_order_user_pk, h_order_pk, h_user_pk, load_dt, load_src) VALUES
-                            (%(hk_order_status_pk)s, %(h_order_pk)s, %(cost)s, %(load_dt)s, %(load_src)s)
-                            ON CONFLICT hk_order_status_pk DO NOTHING -- это пока заготовка!!!!!!!!!
-                        """,
-                        {
-                            'hk_order_user_pk': hash(order_data['payload']['id']+order_data['payload']['user']),
-                            'h_order_pk': hash(order_data['payload']['id']),
-                            'h_user_pk': hash(order_data['payload']['user']),
-                            'load_dt': datetime.now(),
-                            'load_src': 'А вот тут вопрос что указывать в качестве источника!!!!!!!!!',
-                        })
-
-    def load_cathegoty_links(self, product_data
-                            ) -> None:
-        """
-        Функция принимает на вход данные о продукте и
-                заполняет таблицу соединяющую категории и продукты
-        product_data = order_data['payload']['products']
-        """
-        with self._db.connection() as c:
-            for _ in range(len(product_data)):
-                c.cursor().execute(
+                            INSERT INTO dds.l_product_restaurant (hk_product_restaurant_pk, h_restaurant_pk, h_product_pk, load_dt, load_src) VALUES
+                            (cast('{hk_product_restaurant_pk}' as VARCHAR), cast('{h_restaurant_pk}' as VARCHAR), cast('{h_product_pk}' as VARCHAR),'{datetime.now()}'::timestamp, cast('{self.load_src}' as VARCHAR))
+                            ON CONFLICT (hk_product_restaurant_pk) DO NOTHING -- если дубль, то пропускаем
+                        """)
+                connect.commit()
+                h_category_pk = hashlib.sha224(bytes(order_data['payload']['products'][i]['category'], 'utf-8')).hexdigest()
+                hk_product_category_pk = hashlib.sha224(bytes(h_category_pk + h_product_pk, 'utf-8')).hexdigest()
+                connect.cursor().execute(
                             f"""
-                                INSERT INTO dds.dds.l_product_category (hk_product_category_pk, h_category_pk, h_product_pk, load_dt, load_src) VALUES
-                                (%(hk_order_status_pk)s, %(h_order_pk)s, %(cost)s, %(load_dt)s, %(load_src)s)
-                                ON CONFLICT hk_order_status_pk DO NOTHING -- это пока заготовка!!!!!!!!!
-                            """,
-                            {
-                                'hk_product_category_pk': hash(product_data['id']+ product_data['category']),
-                                'h_category_pk': hash(product_data['category']),
-                                'h_product_pk': hash(product_data['id']),
-                                'load_dt': datetime.now(),
-                                'load_src': 'А вот тут вопрос что указывать в качестве источника!!!!!!!!!',
-                            })
+                                INSERT INTO dds.l_product_category (hk_product_category_pk, h_category_pk, h_product_pk, load_dt, load_src) VALUES
+                                (cast('{hk_product_category_pk}' as VARCHAR), cast('{h_category_pk}' as VARCHAR), cast('{h_product_pk}' as VARCHAR),'{datetime.now()}'::timestamp, cast('{self.load_src}' as VARCHAR))
+                                ON CONFLICT (hk_product_category_pk) DO NOTHING -- это пока заготовка!!!!!!!!!
+                            """)
+                connect.commit()
+        

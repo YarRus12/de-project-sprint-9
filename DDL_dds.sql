@@ -9,6 +9,10 @@ drop table if exists dds.h_order CASCADE;
 
 
 
+
+
+
+
 create table if not exists dds.h_user
 (
 h_user_pk VARCHAR  PRIMARY KEY, --UUID
@@ -117,16 +121,24 @@ load_src varchar not null,
 CONSTRAINT fk_order
    FOREIGN KEY(h_order_pk) 
       REFERENCES dds.h_order(h_order_pk));
+     
+
+
 
 
 -- Link-tables --
 
---drop table if exists dds.l_order_product;
+drop table if exists dds.l_order_product;
+drop table if exists dds.l_product_restaurant;
+drop table if exists dds.l_product_category;
+drop table if exists dds.l_order_user;
+
+
 create table if not exists dds.l_order_product
 (
-hk_order_product_pk UUID PRIMARY KEY,
-h_order_pk uuid  not null ,
-h_product_pk uuid  not null,
+hk_order_product_pk VARCHAR PRIMARY KEY,
+h_order_pk VARCHAR  not null ,
+h_product_pk VARCHAR  not null,
 load_dt timestamp not null,
 load_src varchar not null,
 CONSTRAINT fk_order
@@ -137,12 +149,11 @@ CONSTRAINT fk_product
       REFERENCES dds.h_product(h_product_pk)
 );
 
---drop table if exists dds.l_product_restaurant;
 create table if not exists dds.l_product_restaurant
 (
-hk_product_restaurant_pk UUID PRIMARY KEY,
-h_restaurant_pk uuid  not null ,
-h_product_pk uuid  not null,
+hk_product_restaurant_pk VARCHAR PRIMARY KEY,
+h_restaurant_pk VARCHAR  not null ,
+h_product_pk VARCHAR  not null,
 load_dt timestamp not null,
 load_src varchar not null,
 CONSTRAINT fk_restaurant_pr
@@ -153,12 +164,11 @@ CONSTRAINT fk_product_1
       REFERENCES dds.h_product(h_product_pk)
 );
 
---drop table if exists dds.l_product_category;
 create table if not exists dds.l_product_category
 (
-hk_product_category_pk UUID PRIMARY KEY,
-h_category_pk uuid  not null ,
-h_product_pk uuid  not null,
+hk_product_category_pk VARCHAR PRIMARY KEY,
+h_category_pk VARCHAR  not null ,
+h_product_pk VARCHAR  not null,
 load_dt timestamp not null,
 load_src varchar not null,
 CONSTRAINT fk_h_category
@@ -169,12 +179,11 @@ CONSTRAINT fk_product_1
       REFERENCES dds.h_product(h_product_pk)
 );
 
---drop table if exists dds.l_order_user;
 create table if not exists dds.l_order_user
 (
-hk_order_user_pk UUID PRIMARY KEY,
-h_order_pk uuid  not null, 
-h_user_pk uuid  not null,
+hk_order_user_pk VARCHAR PRIMARY KEY,
+h_order_pk VARCHAR  not null, 
+h_user_pk VARCHAR  not null,
 load_dt timestamp not null,
 load_src varchar not null,
 CONSTRAINT fk_h_user
@@ -184,3 +193,32 @@ CONSTRAINT fk_order
    FOREIGN KEY(h_order_pk) 
       REFERENCES dds.h_order(h_order_pk)
 );
+
+
+/*
+select * from dds.h_user;
+select * from dds.h_product;
+select * from dds.h_category;
+select * from dds.h_restaurant;
+select * from dds.h_order;
+
+
+select * from dds.s_user_names;
+select * from dds.s_product_names;
+select * from dds.s_restaurant_names;
+select * from dds.s_order_cost;
+select * from dds.s_order_status;
+
+
+select * from  dds.l_order_product;
+select * from  dds.l_product_restaurant;
+select * from  dds.l_product_category;
+select * from  dds.l_order_user;
+
+
+TRUNCATE table dds.h_user CASCADE;
+TRUNCATE table dds.h_product CASCADE;
+TRUNCATE table dds.h_category CASCADE;
+TRUNCATE table dds.h_restaurant CASCADE;
+TRUNCATE table dds.h_order CASCADE;
+/*

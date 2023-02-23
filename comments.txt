@@ -1,65 +1,50 @@
-Создал в VScode контейнер для изолированной разработки - confluent_kafka не желает устанавливаться, librdkafka и его вариации для разных ОС не дают результата
+Привет! Спасибо за рекомендации!
 
-
-
-de-project-sprint-9/solution/service_stg/src/lib/kafka_connect/kafka_connectors.py
-
-def consume(self, timeout: float = 5.0) -> Optional[Dict]:
-        msg = self.c.poll(timeout=timeout)
-        if not msg:
-            
-            return None
-        if msg.error():
-            raise Exception(msg.error())
-        val = msg.value().decode()
-        return json.loads(val)
-
-Файлится и рестартует соединение
-
-Под dds на сервере создан отдельный топик вручную
-
-
-
-Я перепробовал все 
+Перепробовал всевозможные варианты:
+Создал в VScode контейнер для изолированной разработки - confluent_kafka не желает устанавливаться, 
+    librdkafka и его вариации для разных ОС не дают результата
 Сделал ручной кафка консьюмер для чтения данных из учебного топика, проверил что данные текут
 На случай если не текут сделал ручной продьюсер
-Но при запуске flask ничего не вычитывается, скрипт выполняется ровно до момента вычитки данных из kafka
-При этом неважно пытается ли скрипт получить данные через confluent_kafka или через созданный вручную 
-объект класса KafkaConsumer from kafka (kafka-python)
-
-
-Сосредоточимся на dds
-В app_confiq.py переписал данные о подключениях к kafka для того чтобы вычитывать данные из подготовленного топика dds_service_orders
-И отправлять данные в топик cdm-service-orders
-Выполнил два файла эмулятора service_stg/test/Kafka_outstg_producer.py для отправки данных в топик dds_service_orders
-и service_dds/test/Kafka_consumer_dds.py для проверки, что данные в топике есть
-
-lib/kafka_connect/kafka_connectors.py оставил как было предусмотрено авторами проекта
-При запуске wsgi приложения исполнение завершается с ошибкой после INFO in dds_message_processor_job: 2023-02-23 02:46:34.997908: START
-Как раз в той части кода, где происходит вычитка данных из топика:
-    Something went wrong: KafkaError{code=_RESOLVE,val=-193,str="sasl_ssl://rc1a-acu020ec9kbesc8g.mdb.yandexcloud.net:9091:9091:9092/bootstrap: 
-    Failed to resolve 'rc1a-acu020ec9kbesc8g.mdb.yandexcloud.net:9091:9091:9092': nodename nor servname provided, or not known (after 2ms in state CONNECT, 
-    16 identical error(s) suppressed)"}
-
+    В app_confiq.py переписал данные о подключениях к kafka для того чтобы вычитывать данные из подготовленного топика dds_service_orders
+    И отправлять данные в топик cdm-service-orders
+    Но при запуске flask ничего не вычитывается, скрипт выполняется ровно до момента вычитки данных из kafka
+    "INFO in dds_message_processor_job: 2023-02-23 02:46:34.997908: START"
+    Как раз в той части кода, где происходит вычитка данных из топика:
+        "Something went wrong: KafkaError{code=_RESOLVE,val=-193,str="sasl_ssl://rc1a-acu020ec9kbesc8g.mdb.yandexcloud.net:9091:9091:9092/bootstrap: 
+        Failed to resolve 'rc1a-acu020ec9kbesc8g.mdb.yandexcloud.net:9091:9091:9092': nodename nor servname provided, or not known (after 2ms in state CONNECT, 
+        16 identical error(s) suppressed)"}"
+    При этом неважно пытается ли скрипт получить данные через confluent_kafka или через созданный вручную 
+    объект класса KafkaConsumer from kafka (kafka-python)    
+    Соединнение с postgresql работает устойчиво
+    WSGI приложения мне не известны и как их чинить я не имею не малейшего представления
+    Похожая проблема при отправки сообщений в очередь кафки
 Поэтому хочу я того или нет мне придется делать проект через классы-эмуляторы
+    для этого в файле service_dds/src/dds_loader/dds_emulations.py создал два класса
+    Один выдает данные при обращении к нему
+    Другой принимает данные при обращении к нему
 
 
+DDS слой выполняет требуемуему задачу
+    Получает данные из объекта класса ToDdsKafkaProducer файла service_dds/src/dds_loader/dds_emulations.py
+    Обрабатывает, преобразует и сохраняет результат в развернутый в облаке postgresql
+    Формирует данные для отправки в топик кафки
+    Отправляет данные в класс эмулятор FromDdsKafkaProducer файла service_dds/src/dds_loader/dds_emulations.py
+    
 
-Не помню чтобы раньше мы работали с UUID, по требованиям урока это поля h_user_pk и подобные должны иметь тип UUID 
-Но вот вставить UUID таким образом у меня не получится он или должен генерироваться внутренними инструментали
-Видимо через CREATE EXTENSION "uuid-ossp"; и uuid_generate_v5('{user_data['id']}')
-Но я не могу этого делать "Must be superuser to create this extension" и нет ни инструкции ни подсказки как стать superuser
-на собственном кластере, так что пока переделал DDL на VARCHAR
+Оставшиеся вопросы:
+1.  Не помню чтобы раньше мы работали с UUID, по требованиям урока это поля h_user_pk и подобные должны иметь тип UUID 
+    Но вот вставить UUID таким образом у меня не получится он или должен генерироваться внутренними инструментали
+    Видимо через CREATE EXTENSION "uuid-ossp"; и uuid_generate_v5('{user_data['id']}')
+    Но я не могу этого делать "Must be superuser to create this extension" и нет ни инструкции, ни подсказки как стать superuser
+    на собственном кластере, так что пока переделал в DDL все поля на VARCHAR, чтобы хотябы можно было работать
+    Оставить VARCHAR?
 
+2. userlogin есть в DDL коде урока, но я не вижу этих данных, которые были в учебно кафке
+    могу заполнить произвольно?
+3. hash(user_data['id']) генерирует случайные цифры это неправильно, поэтому взял hashlib.sha224
+    такое решение устроит?
 
-userlogin = 'someuserlogin' # userlogin есть в DDL коде урока, но я не вижу этих данных
-hash(user_data['id']) генерирует случайные цифры
+Код ужасный, неоптимизированный, но работает 
+С проверкой можно не спешить, пока буду делать service_cdm
 
-Все данные вставляются преобразованными            
-Специально пишу очень подробно, пишу для себя, иначе потом не вспомню откуда что берется
-
-Код ужасный, неоптимизированный, 
-
-
-
-
+Успехов!
