@@ -1,7 +1,7 @@
 import json
 from typing import Dict, Optional
 
-from confluent_kafka import Consumer, Producer
+#from confluent_kafka import Consumer, Producer
 
 
 def error_callback(err):
@@ -21,7 +21,7 @@ class KafkaProducer:
         }
 
         self.topic = topic
-        self.p = Producer(params)
+        #self.p = Producer(params)
 
     def produce(self, payload: Dict) -> None:
         self.p.produce(self.topic, json.dumps(payload))
@@ -54,7 +54,7 @@ class KafkaConsumer:
         }
 
         self.topic = topic
-        self.c = Consumer(params)
+        #self.c = Consumer(params)
         self.c.subscribe([topic])
 
     def consume(self, timeout: float = 3.0) -> Optional[Dict]:

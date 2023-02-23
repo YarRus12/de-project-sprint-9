@@ -2,7 +2,7 @@ import json
 import time
 from typing import Dict, Optional
 from kafka import KafkaConsumer
-from confluent_kafka import Consumer, Producer
+#from confluent_kafka import Consumer, Producer
 
 
 def error_callback(err):
@@ -21,7 +21,7 @@ class KafkaProducer:
         }
 
         self.topic = 'stg-service-orders'
-        self.p = Producer(params)
+        #self.p = Producer(params)
 
     def produce(self, payload: Dict) -> None:
         self.p.produce(self.topic, json.dumps(payload, ensure_ascii=False))
@@ -53,7 +53,7 @@ class KafkaConsumer:
             'client.id': 'someclientkey'
         }
         self.topic = topic
-        self.c = Consumer(params)
+        #self.c = Consumer(params)
         self.c.subscribe([topic])
 
     def consume(self, timeout: float = 5.0) -> Optional[Dict]:

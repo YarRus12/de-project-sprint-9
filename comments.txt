@@ -1,48 +1,5 @@
-Привет! Спасибо за рекомендации!
-
-Перепробовал всевозможные варианты:
-Создал в VScode контейнер для изолированной разработки - confluent_kafka не желает устанавливаться, 
-    librdkafka и его вариации для разных ОС не дают результата
-Сделал ручной кафка консьюмер для чтения данных из учебного топика, проверил что данные текут
-На случай если не текут сделал ручной продьюсер
-    В app_confiq.py переписал данные о подключениях к kafka для того чтобы вычитывать данные из подготовленного топика dds_service_orders
-    И отправлять данные в топик cdm-service-orders
-    Но при запуске flask ничего не вычитывается, скрипт выполняется ровно до момента вычитки данных из kafka
-    "INFO in dds_message_processor_job: 2023-02-23 02:46:34.997908: START"
-    Как раз в той части кода, где происходит вычитка данных из топика:
-        "Something went wrong: KafkaError{code=_RESOLVE,val=-193,str="sasl_ssl://rc1a-acu020ec9kbesc8g.mdb.yandexcloud.net:9091:9091:9092/bootstrap: 
-        Failed to resolve 'rc1a-acu020ec9kbesc8g.mdb.yandexcloud.net:9091:9091:9092': nodename nor servname provided, or not known (after 2ms in state CONNECT, 
-        16 identical error(s) suppressed)"}"
-    При этом неважно пытается ли скрипт получить данные через confluent_kafka или через созданный вручную 
-    объект класса KafkaConsumer from kafka (kafka-python)    
-    Соединнение с postgresql работает устойчиво
-    WSGI приложения мне не известны и как их чинить я не имею не малейшего представления
-    Похожая проблема при отправки сообщений в очередь кафки
-Поэтому хочу я того или нет мне придется делать проект через классы-эмуляторы
-    для этого в файле service_dds/src/dds_loader/dds_emulations.py создал два класса
-    Один выдает данные при обращении к нему
-    Другой принимает данные при обращении к нему
-
-DDS слой выполняет требуемую задачу
-    Получает данные из объекта класса ToDdsKafkaProducer файла service_dds/src/dds_loader/dds_emulations.py
-    Обрабатывает, преобразует и сохраняет результат в развернутый в облаке postgresql
-    Формирует данные для отправки в топик кафки
-    Отправляет данные в класс эмулятор FromDdsKafkaProducer файла service_dds/src/dds_loader/dds_emulations.py
-
-CDM слой ой выполняет требуемую задачу
-    Получает данные из объекта класса ToCdmKafkaProducer файла service_cdm/src/cdm_loader/cdm_emulations.py,
-    преобразует и сохраняет результат в развернутый в облаке postgresql
-
-Оставшиеся вопросы:
-1. userlogin есть в DDL коде урока, но я не вижу этих данных, которые были в учебно кафке
-    могу заполнить произвольно?
-2. Не понял как можно в cdm_repository
-    INSERT INTO cdm.user_category_counters (user_id, category_id, category_name, order_cnt) VALUES
-                    (%(user_id)s, %(category_id)s, %(category_name)s, %(order_cnt)s)
-                    ON CONFLICT (user_id, category_id) DO UPDATE SET order_cnt = user_category_counters.order_cnt + 1;
-    добавить логику, которая обработает случаи, когда изменяется название продукта (product_name), с тем же id.
-    можно указать несколько случаев ON CONFLICT ???
-
-Код ужасный, неоптимизированный, но работает 
-
-Успехов!
+Привет, Саша! 
+Спасибо за ревью!
+Я буду искренне благодарен, если примешь проект как есть!
+До деволс и микросервиса я еще не дорос)
+Еще раз спасибо и успехов!
