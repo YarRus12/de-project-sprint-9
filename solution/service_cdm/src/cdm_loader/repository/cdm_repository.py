@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict, List
 
+import hashlib
 from lib.pg import PgConnect
 from pydantic import BaseModel
 
@@ -11,8 +12,8 @@ class CdmRepository:
     def __init__(self, db: PgConnect) -> None:
         self._db = db
         
-        def load_data(self,
-                    data: dict # user_data = order_data['user']
+    def load_data(self,
+                data: dict
                     ) -> None:
             """
             Принимает в себя данные вида 
@@ -20,32 +21,24 @@ class CdmRepository:
             'name': 'РОЛЛ С ТОФУ И ВЯЛЕНЫМИ ТОМАТАМИ', 'category': 'Выпечка', 
             'user_id': '626a81ce9a8cd1920641e296'}
             """
-            # Если я правильно понимаю, cdm.user_product_counters мы считатаем количество продуктов у конкретного покупателей
-            # Вопрос как формировать id для записей? следует ли делать это через sequence
-            with self._db.connection() as c:
-                c.cursor().execute(
+            
+            with self._db.connection() as connect:
+                max_id=connect.cursor().execute("""SELECT coalesce(MAX(id),0) FROM cdm.user_product_counters""").fetchone()[0]
+                connect.cursor().execute(
                     f"""
-                    INSERT INTO cdm.user_product_counters (user_id, product_id, product_name, order_cnt) VALUES
-                    (%(user_id)s, %(product_id)s, %(product_name)s, %(order_cnt)s)
+                    INSERT INTO cdm.user_product_counters (id, user_id, product_id, product_name, order_cnt) VALUES
+                    ({max_id+1},'{uuid.uuid5(uuid.NAMESPACE_DNS, data['user_id'])}', '{uuid.uuid5(uuid.NAMESPACE_DNS, data['id'])}', '{data['name']}', 1)
                     ON CONFLICT (user_id, product_id) DO UPDATE SET order_cnt = user_product_counters.order_cnt + 1;
-                """,
-                {
-                    'user_id': data['user_id'],
-                    'product_id': data['id'],
-                    'product_name':data['name'],
-                    'order_cnt': 1,
-                })
-            with self._db.connection() as c:
+                    """)
+                connect.commit()
+            with self._db.connection() as connect:
                 # Вопрос как формировать id для записей? следует ли делать это через sequence
-                c.cursor().execute(
-                    f"""
-                    INSERT INTO cdm.user_category_counters (user_id, category_id, category_name, order_cnt) VALUES
-                    (%(user_id)s, %(category_id)s, %(category_name)s, %(order_cnt)s)
+                max_id=connect.cursor().execute("""SELECT coalesce(MAX(id),0) FROM cdm.user_category_counters""").fetchone()[0]
+                sql = f"""
+                    INSERT INTO cdm.user_category_counters (id, user_id, category_id, category_name, order_cnt) VALUES
+                    ({max_id+1},'{uuid.uuid5(uuid.NAMESPACE_DNS, data['user_id'])}', '{uuid.uuid5(uuid.NAMESPACE_DNS, data['category'])}', '{data['category']}', 1)
                     ON CONFLICT (user_id, category_id) DO UPDATE SET order_cnt = user_category_counters.order_cnt + 1;
-                """,
-                {
-                    'user_id': data['user_id'],
-                    'category_id': hash(data["category"]),
-                    'category_name': data['category'],
-                    'order_cnt': data['quantity'],
-                })
+                """
+                print(sql)
+                connect.cursor().execute(sql)
+                connect.commit()

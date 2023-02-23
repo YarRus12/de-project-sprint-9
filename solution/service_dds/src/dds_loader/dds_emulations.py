@@ -48,4 +48,3 @@ class FromDdsKafkaProducer():
     def send(self, data): 
        self.list_of_data.append(data)
        print("Message received")
-       

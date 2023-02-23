@@ -1,24 +1,221 @@
---select * from information_schema.schemata s 
---drop table if exists cdm.user_product_counters;
---drop table if exists cdm.user_category_counters;
+--CREATE EXTENSION "uuid-ossp";
 
-CREATE schema if not exists cdm;
+--- HUB-tables ---
 
-create table if not exists cdm.user_product_counters
+drop table if exists dds.h_user CASCADE;
+drop table if exists dds.h_product CASCADE;
+drop table if exists dds.h_category CASCADE;
+drop table if exists dds.h_restaurant CASCADE;
+drop table if exists dds.h_order CASCADE;
+
+
+
+create table if not exists dds.h_user
 (
-id integer PRIMARY KEY,
-user_id UUID not null,
-product_id uuid not null,
-product_name varchar(255) not null,
-order_cnt integer CHECK (order_cnt > 0) not null,
-CONSTRAINT user_product_unique UNIQUE (user_id, product_id)
-)
+h_user_pk UUID  PRIMARY KEY, --UUID
+user_id VARCHAR  not null,
+load_dt timestamp not null,
+load_src varchar not null
+);
 
-create table if not exists cdm.user_category_counters
+create table if not exists dds.h_product
 (
-id integer PRIMARY KEY,
-user_id UUID not null,
-category_id uuid not null,
-category_name varchar(255) not null,
-order_cnt integer CHECK (order_cnt > 0) not null
-)
+h_product_pk UUID PRIMARY KEY, -- UUID
+product_id VARCHAR  not null,
+load_dt timestamp not null,
+load_src varchar not null
+);
+create table if not exists dds.h_category
+(
+h_category_pk UUID PRIMARY KEY, -- UUID
+category_name VARCHAR  not null,
+load_dt timestamp not null,
+load_src varchar not null
+);
+
+create table if not exists dds.h_restaurant
+(
+h_restaurant_pk UUID PRIMARY KEY, -- UUID
+restaurant_id VARCHAR  not null,
+load_dt timestamp not null,
+load_src varchar not null
+);
+create table if not exists dds.h_order
+(
+h_order_pk UUID PRIMARY KEY, -- UUID
+order_id integer  not null,
+order_dt timestamp  not null,
+load_dt timestamp not null,
+load_src varchar not null
+);
+
+
+
+
+-- Satelit-tables --
+
+drop table if exists dds.s_user_names;
+drop table if exists dds.s_product_names;
+drop table if exists dds.s_restaurant_names;
+drop table if exists dds.s_order_cost;
+drop table if exists dds.s_order_status CASCADE;
+
+
+
+create table if not exists dds.s_user_names
+(
+hk_user_names_pk UUID PRIMARY KEY, -- UUID
+h_user_pk UUID not null, -- UUID
+username varchar not null,
+userlogin varchar not null,
+load_dt timestamp not null,
+load_src varchar not null,
+CONSTRAINT fk_h_user
+   FOREIGN KEY(h_user_pk) 
+      REFERENCES dds.h_user(h_user_pk));
+
+create table if not exists dds.s_product_names
+(
+hk_product_names_pk UUID PRIMARY KEY, -- UUID
+h_product_pk UUID, -- UUID
+name varchar not null,
+load_dt timestamp not null,
+load_src varchar not null,
+CONSTRAINT fk_h_product
+   FOREIGN KEY(h_product_pk) 
+      REFERENCES dds.h_product(h_product_pk));
+
+create table if not exists dds.s_restaurant_names
+(
+hk_restaurant_names_pk UUID PRIMARY KEY, -- UUID
+h_restaurant_pk UUID not null, -- UUID
+name varchar not null,
+load_dt timestamp not null,
+load_src varchar not null,
+CONSTRAINT fk_h_restaurant
+   FOREIGN KEY(h_restaurant_pk) 
+      REFERENCES dds.h_restaurant(h_restaurant_pk));
+
+create table if not exists dds.s_order_cost
+(
+hk_order_cost_pk UUID PRIMARY KEY, -- UUID
+h_order_pk UUID not null, -- UUID
+cost decimal(18,5) not null,
+payment decimal(18,5) not null,
+load_dt timestamp not null,
+load_src varchar not null,
+CONSTRAINT fk_order
+   FOREIGN KEY(h_order_pk) 
+      REFERENCES dds.h_order(h_order_pk));
+
+create table if not exists dds.s_order_status
+(
+hk_order_status_pk UUID PRIMARY KEY, -- UUID
+h_order_pk UUID not null, -- UUID
+status varchar not null,
+load_dt timestamp not null,
+load_src varchar not null,
+CONSTRAINT fk_order
+   FOREIGN KEY(h_order_pk) 
+      REFERENCES dds.h_order(h_order_pk));
+     
+
+
+
+
+-- Link-tables --
+
+drop table if exists dds.l_order_product;
+drop table if exists dds.l_product_restaurant;
+drop table if exists dds.l_product_category;
+drop table if exists dds.l_order_user;
+
+
+create table if not exists dds.l_order_product
+(
+hk_order_product_pk UUID PRIMARY KEY,
+h_order_pk UUID  not null ,
+h_product_pk UUID  not null,
+load_dt timestamp not null,
+load_src varchar not null,
+CONSTRAINT fk_order
+   FOREIGN KEY(h_order_pk) 
+      REFERENCES dds.h_order(h_order_pk),
+CONSTRAINT fk_product
+   FOREIGN KEY(h_product_pk) 
+      REFERENCES dds.h_product(h_product_pk)
+);
+
+create table if not exists dds.l_product_restaurant
+(
+hk_product_restaurant_pk UUID PRIMARY KEY,
+h_restaurant_pk UUID  not null ,
+h_product_pk UUID  not null,
+load_dt timestamp not null,
+load_src varchar not null,
+CONSTRAINT fk_restaurant_pr
+   FOREIGN KEY(h_restaurant_pk) 
+      REFERENCES dds.h_restaurant(h_restaurant_pk),
+CONSTRAINT fk_product_1
+   FOREIGN KEY(h_product_pk) 
+      REFERENCES dds.h_product(h_product_pk)
+);
+
+create table if not exists dds.l_product_category
+(
+hk_product_category_pk UUID PRIMARY KEY,
+h_category_pk UUID  not null ,
+h_product_pk UUID  not null,
+load_dt timestamp not null,
+load_src varchar not null,
+CONSTRAINT fk_h_category
+   FOREIGN KEY(h_category_pk) 
+      REFERENCES dds.h_category(h_category_pk),
+CONSTRAINT fk_product_1
+   FOREIGN KEY(h_product_pk) 
+      REFERENCES dds.h_product(h_product_pk)
+);
+
+create table if not exists dds.l_order_user
+(
+hk_order_user_pk UUID PRIMARY KEY,
+h_order_pk UUID  not null, 
+h_user_pk UUID  not null,
+load_dt timestamp not null,
+load_src varchar not null,
+CONSTRAINT fk_h_user
+   FOREIGN KEY(h_user_pk) 
+      REFERENCES dds.h_user(h_user_pk),
+CONSTRAINT fk_order
+   FOREIGN KEY(h_order_pk) 
+      REFERENCES dds.h_order(h_order_pk)
+);
+
+
+/*
+select * from dds.h_user;
+select * from dds.h_product;
+select * from dds.h_category;
+select * from dds.h_restaurant;
+select * from dds.h_order;
+
+
+select * from dds.s_user_names;
+select * from dds.s_product_names;
+select * from dds.s_restaurant_names;
+select * from dds.s_order_cost;
+select * from dds.s_order_status;
+
+
+select * from  dds.l_order_product;
+select * from  dds.l_product_restaurant;
+select * from  dds.l_product_category;
+select * from  dds.l_order_user;
+
+
+TRUNCATE table dds.h_user CASCADE;
+TRUNCATE table dds.h_product CASCADE;
+TRUNCATE table dds.h_category CASCADE;
+TRUNCATE table dds.h_restaurant CASCADE;
+TRUNCATE table dds.h_order CASCADE;
+/*

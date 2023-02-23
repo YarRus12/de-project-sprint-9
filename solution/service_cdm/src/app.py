@@ -17,11 +17,13 @@ if __name__ == '__main__':
     app.logger.setLevel(logging.DEBUG)
 
     proc = CdmMessageProcessor(
-        app.logger
+        consumer = '', # config.kafka_consumer() Я убрал консьюмер умышленно, его заменил эмулятор 
+        cdm_repository = config.pg_warehouse_db(),
+        logger = app.logger
     )
 
     scheduler = BackgroundScheduler()
     scheduler.add_job(func=proc.run, trigger="interval", seconds=25)
     scheduler.start()
-
-    app.run(debug=True, host='0.0.0.0', use_reloader=False)
+    
+    app.run(debug=True, host='0.0.0.0', use_reloader=False,port=8083)
