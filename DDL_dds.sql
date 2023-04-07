@@ -1,16 +1,11 @@
 --CREATE EXTENSION "uuid-ossp";
 
 --- HUB-tables ---
-drop table if exists dds.h_user CASCADE;
-drop table if exists dds.h_product CASCADE;
-drop table if exists dds.h_category CASCADE;
-drop table if exists dds.h_restaurant CASCADE;
-drop table if exists dds.h_order CASCADE;
-
-
-
-
-
+--drop table if exists dds.h_user CASCADE;
+--drop table if exists dds.h_product CASCADE;
+--drop table if exists dds.h_category CASCADE;
+--drop table if exists dds.h_restaurant CASCADE;
+--drop table if exists dds.h_order CASCADE;
 
 
 create table if not exists dds.h_user
@@ -53,17 +48,13 @@ load_src varchar not null
 );
 
 
-
-
 -- Satelit-tables --
 
-drop table if exists dds.s_user_names;
-drop table if exists dds.s_product_names;
-drop table if exists dds.s_restaurant_names;
-drop table if exists dds.s_order_cost;
-drop table if exists dds.s_order_status CASCADE;
-
-
+--drop table if exists dds.s_user_names;
+--drop table if exists dds.s_product_names;
+--drop table if exists dds.s_restaurant_names;
+--drop table if exists dds.s_order_cost;
+--drop table if exists dds.s_order_status CASCADE;
 
 create table if not exists dds.s_user_names
 (
@@ -121,17 +112,14 @@ load_src varchar not null,
 CONSTRAINT fk_order
    FOREIGN KEY(h_order_pk) 
       REFERENCES dds.h_order(h_order_pk));
-     
-
-
 
 
 -- Link-tables --
 
-drop table if exists dds.l_order_product;
-drop table if exists dds.l_product_restaurant;
-drop table if exists dds.l_product_category;
-drop table if exists dds.l_order_user;
+--drop table if exists dds.l_order_product;
+--drop table if exists dds.l_product_restaurant;
+--drop table if exists dds.l_product_category;
+--drop table if exists dds.l_order_user;
 
 
 create table if not exists dds.l_order_product
@@ -193,32 +181,3 @@ CONSTRAINT fk_order
    FOREIGN KEY(h_order_pk) 
       REFERENCES dds.h_order(h_order_pk)
 );
-
-
-/*
-select * from dds.h_user;
-select * from dds.h_product;
-select * from dds.h_category;
-select * from dds.h_restaurant;
-select * from dds.h_order;
-
-
-select * from dds.s_user_names;
-select * from dds.s_product_names;
-select * from dds.s_restaurant_names;
-select * from dds.s_order_cost;
-select * from dds.s_order_status;
-
-
-select * from  dds.l_order_product;
-select * from  dds.l_product_restaurant;
-select * from  dds.l_product_category;
-select * from  dds.l_order_user;
-
-
-TRUNCATE table dds.h_user CASCADE;
-TRUNCATE table dds.h_product CASCADE;
-TRUNCATE table dds.h_category CASCADE;
-TRUNCATE table dds.h_restaurant CASCADE;
-TRUNCATE table dds.h_order CASCADE;
-/*
